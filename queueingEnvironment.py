@@ -63,7 +63,7 @@ def setup(env, num_queues, t_inter,wait_times):
         env.process(student(env, 'student %d' % i, testCenter,wait_times))
 
 
-def execute_one_day():
+def execute_one_day(NUM_QUEUES):
     # Create an environment and start the setup process
     wait_times = []
     env = simpy.Environment()
