@@ -3,7 +3,10 @@ import simpy
 import matplotlib.pyplot as plt
 
 # RANDOM_SEED = 42
-NUM_QUEUES = 2  # Number of test takers in the center
+NUM_QUEUES = 8  # Number of registrars in the center
+NUM_TENTS= 4  # Number of testing tents in the center
+FIRST_CHECKIN_TIME = 10
+RETURN_CHECKIN_TIME = 10
 FIRST_TEST_TIME = 10      # Minutes it takes to test for first time test takers
 RETURN_TEST_TIME = 3      # Minutes it takes to test for return time test takers
 T_INTER = 5       # A new student comes every ~7 minutes
@@ -27,12 +30,19 @@ class MonitoredResource(simpy.Resource):
 class TestCenter(object):
     def __init__(self, env, num_queue):
         self.env = env
+        self.checking_queue = MonitoredResource(env, capacity=num_queue)
+        self.testing_queue = MonitoredResource(env, capacity=NUM_TENTS)
 
-        self.testing_queue = MonitoredResource(env, capacity=num_queue)
-
-    def take_test(self,mean_test_time):
+    def check_in(self, mean_check_in_time,mean_test_time):
+        checkin_time=np.random.exponential(mean_check_in_time)
+        yield self.env.timeout(checkin_time)
+        with self.testing_queue.request() as request:
+            yield request
+            yield self.env.process(self.take_test(mean_test_time))
+    def take_test(self, mean_test_time):
         test_time=np.random.exponential(mean_test_time)
         yield self.env.timeout(test_time)
+
 
 
 def student(env, name, tc,wait_times):
@@ -42,19 +52,19 @@ def student(env, name, tc,wait_times):
 
     if state<NUM_FIRST_TIME_TESTERS*1./(NUM_RETURN_TESTERS+NUM_FIRST_TIME_TESTERS):
         # new tester
-        with tc.testing_queue.request() as request:
+        with tc.checking_queue.request() as request:
             yield request
             wait_time=env.now-arrival_time
             # print('%s new tester starts the test at %.2f.' % (name, env.now))
-            yield env.process(tc.check_in(FIRST_TEST_TIME))
+            yield env.process(tc.check_in(FIRST_CHECKIN_TIME,FIRST_TEST_TIME))
             # print('%s new tester leaves the center at %.2f.' % (name, env.now))
     else:
         # return tester
-        with tc.testing_queue.request() as request:
+        with tc.checking_queue.request() as request:
             yield request
             wait_time=env.now-arrival_time
             # print('%s return tester starts the test at %.2f.' % (name, env.now))
-            yield env.process(tc.check_in(RETURN_TEST_TIME))
+            yield env.process(tc.check_in(RETURN_CHECKIN_TIME,RETURN_TEST_TIME))
             # print('%s return tester leaves the center at %.2f.' % (name, env.now))
 
     wait_times.append(wait_time)
@@ -75,6 +85,7 @@ def setup(env, num_queues, t_inter,wait_times):
         i += 1
         env.process(student(env, 'student %d' % i, testCenter,wait_times))
     print(testCenter.testing_queue.data)
+    print(testCenter.checkin_quque.data)
 
 def execute_one_day(NUM_QUEUES):
     # Create an environment and start the setup process
