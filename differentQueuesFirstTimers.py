@@ -2,7 +2,6 @@ import numpy as np
 import simpy
 import matplotlib.pyplot as plt
 
-# RANDOM_SEED = 42
 NUM_QUEUES = 8  # Number of registrars in the center
 NUM_TENTS= 4  # Number of testing tents in the center
 FIRST_CHECKIN_TIME = 10
