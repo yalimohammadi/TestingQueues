@@ -2,33 +2,19 @@ import numpy as np
 import simpy
 import matplotlib.pyplot as plt
 
-# RANDOM_SEED = 42
-NUM_QUEUES = 2  # Number of test takers in the center
+NUM_QUEUES = 4
 FIRST_TEST_TIME = 10      # Minutes it takes to test for first time test takers
-RETURN_TEST_TIME = 3      # Minutes it takes to test for return time test takers
-T_INTER = 5       # A new student comes every ~7 minutes
-SIM_TIME = 60     # Simulation time in minutes
+RETURN_TEST_TIME = 6      # Minutes it takes to test for return time test takers
+T_INTER = 3       # A new student comes every ~7 minutes
+SIM_TIME = 120     # Simulation time in minutes
 NUM_FIRST_TIME_TESTERS = 800
 NUM_RETURN_TESTERS = 200
-class MonitoredResource(simpy.Resource):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.data = []
-
-    def request(self, *args, **kwargs):
-        self.data.append((self._env.now, len(self.queue)))
-        print("queues",self.queue)
-        return super().request(*args, **kwargs)
-
-    def release(self, *args, **kwargs):
-        self.data.append((self._env.now, len(self.queue)))
-        return super().release(*args, **kwargs)
 
 class TestCenter(object):
     def __init__(self, env, num_queue):
         self.env = env
 
-        self.testing_queue = MonitoredResource(env, capacity=num_queue)
+        self.testing_queue = simpy.Resource(env, capacity=num_queue)
 
     def take_test(self,mean_test_time):
         test_time=np.random.exponential(mean_test_time)
@@ -46,7 +32,7 @@ def student(env, name, tc,wait_times):
             yield request
             wait_time=env.now-arrival_time
             # print('%s new tester starts the test at %.2f.' % (name, env.now))
-            yield env.process(tc.check_in(FIRST_TEST_TIME))
+            yield env.process(tc.take_test(FIRST_TEST_TIME))
             # print('%s new tester leaves the center at %.2f.' % (name, env.now))
     else:
         # return tester
@@ -54,7 +40,7 @@ def student(env, name, tc,wait_times):
             yield request
             wait_time=env.now-arrival_time
             # print('%s return tester starts the test at %.2f.' % (name, env.now))
-            yield env.process(tc.check_in(RETURN_TEST_TIME))
+            yield env.process(tc.take_test(RETURN_TEST_TIME))
             # print('%s return tester leaves the center at %.2f.' % (name, env.now))
 
     wait_times.append(wait_time)
@@ -76,7 +62,7 @@ def setup(env, num_queues, t_inter,wait_times):
         env.process(student(env, 'student %d' % i, testCenter,wait_times))
     print(testCenter.testing_queue.data)
 
-def execute_one_day(NUM_QUEUES):
+def execute_one_day():
     # Create an environment and start the setup process
     wait_times = []
     env = simpy.Environment()
@@ -89,12 +75,12 @@ def execute_one_day(NUM_QUEUES):
     return wait_times
 
 all_wait_times=[]
-for i in range(100):
-    wait_times=execute_one_day(2)
+for i in range(1000):
+    wait_times=execute_one_day()
     all_wait_times+=wait_times
 
 print(all_wait_times)
-plt.hist(all_wait_times, bins='auto')  # arguments are passed to np.histogram
+plt.hist(all_wait_times, bins=50,density=True)  # arguments are passed to np.histogram
 plt.title("Two queues with mixed students ")
 plt.xlabel("Waiting time in minute")
 plt.ylabel("Counts")
