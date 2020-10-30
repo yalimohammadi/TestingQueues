@@ -19,13 +19,22 @@ Stevenson={"W":[8.5,8.5,8.5,7,8.5],"Nurse":[3]*5}
 Wilson={"W":[8.1,8.5,8.5,8.5,8.5],"Nurse":[5,4,4,4,4]}
 East=[Hunting,Acad,Perez,SGate,Stevenson,Wilson]
 
-Pacioma={"W":[7.5,8.3,8.3,],"Nurse":[4,3,4,4,4]}
-Madison={"W":[8.5,9,9,9,9],"Nurse":[3,3,3,3,2]}
-Romer={"W":[8.5,9,9,9,9],"Nurse":[2,3,3,2,2]}
-SanFernando={"W":[8.5,9,9,9,9],"Nurse":[3,3,3,2,2]}
-Gleason={"W":[8.5,9,9,9,9],"Nurse":[2]}
-Vista={"W":[8.5,9,9,9,9],"Nurse":[2]*5}
+Pacioma={"W":[7.5,8.3,8.35,8.3,8.75],"Nurse":[4,3,4,4,4]}
+Madison={"W":[8.8,8.7,8.8,7.1,7],"Nurse":[3,3,3,3,2]}
+Romer={"W":[9.5,9.16,9.16,9,9],"Nurse":[2,3,3,2,2]}
+SanFernando={"W":[9.1,9.1,9.1,9,9],"Nurse":[3,3,3,2,2]}
+Gleason={"W":[7.25,9.5,9.5,7.25,9.5],"Nurse":[2]*5}
+Vista={"W":[9.5]*5,"Nurse":[2]*5}
 NEast=[Pacioma,Madison,Romer,SanFernando,Gleason,Vista]
+
+
+Frost={"W":[8.5]*5,"Nurse":[2]*5}
+Holmes={"W":[8.8,8.8,9, 8.8,8.8],"Nurse":[3,3,2,3,3]}
+Lawrence={"W":[9,8.5,8.5,8.5,8.5],"Nurse":[2]*5}
+Northridge={"W":[9,9,8.5,8.5,8.8],"Nurse":[2,2,3,3,3]}
+Reseda={"W":[8.5]*5,"Nurse":[2]*5}
+Woodland={"W":[8.8,8.8,8.8,9,9],"Nurse":[3,3,3,2,2]}
+NWest=[Frost, Holmes, Lawrence, Northridge,Reseda,Woodland]
 
 def find_num_students_tested_for_school_week(school,CS,CA,P):
     working_hours=school["W"]
@@ -33,6 +42,7 @@ def find_num_students_tested_for_school_week(school,CS,CA,P):
     num_students_shared=[]
     num_students_separate = []
     for i in range(5): #days of week
+        print(school)
         shared= find_number_of_student(CA, CS, W=working_hours[i], L=num_personell[i], P=P, max_wait_time=5, shared_queue=True)
         separate = find_number_of_student(CA, CS, W=working_hours[i], L=num_personell[i], P=P, max_wait_time=5, shared_queue=False)
         num_students_separate.append(separate)
@@ -60,14 +70,22 @@ def find_num_students_tested_for_district_week(district,CS,CA,P):
 
 
 def plot_school(data,label):
+    days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
     plt.plot(days,data,label=label)
 
-days=["Mon","Tue","Wed","Thu","Fri"]
-total_shared,total_spsarate= find_num_students_tested_for_district_week(Central,CS=.18,CA=1.,P=2.5)
-plot_school(total_shared,"Central, Shared Queues")
-plot_school(total_spsarate,"Central, Separate Queues")
+
+def district_plot(district,name):
+    total_shared, total_spsarate = find_num_students_tested_for_district_week(district, CS=.18, CA=1., P=2.5)
+    plot_school(total_shared, name+"")
+    # plot_school(total_spsarate, name+", Separate Queues")
+
+district_plot(Central,"C")
+district_plot(East,"E")
+district_plot(NEast,"NE")
+district_plot(NWest,"NW")
 plt.ylabel("number of students tested")
 plt.xlabel("days of week")
+plt.title("Shared Queues")
 plt.legend()
 plt.show()
 
