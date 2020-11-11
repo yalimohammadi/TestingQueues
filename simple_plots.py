@@ -45,7 +45,7 @@ def find_needed_work_hours(CA,CS, N, L, P, max_queue_length=10):
     return -1
 
 def find_number_of_student(CA,CS, W, L, P, max_wait_time=10,shared_queue=True):
-    for N in range(4000,100,-1):
+    for N in range(4000,10,-1):
         if shared_queue:
             avg_wait=calc_waiting_time(CA, CS, N, W, L, P)
         else:
@@ -83,42 +83,44 @@ W= 3 # 	Total working hours
 
 
 
-# to_plot1=[]
-# to_plot2=[]
-# to_plot3=[]
-# to_plot4=[]
-# max_st=300
-# N=2000
-# min_T=2.8
-# L_range=np.linspace(2.5,8,100)
-# for W in L_range:
-#     CA = 1.
-#     CS = .45
-#
-#     L = 8 # Total Lanes
-#     P =2. # Time per person per lane
-#     N = find_number_of_student(CA,CS,  W,L,P/2, max_wait_time=5,shared_queue=True) # first strategy
-#     to_plot1.append(N)
-#     # L = find_number_of_workers(CA,CS, N, W, P, max_wait_time=20,factor=4) # first strategy
-#     # to_plot3.append(L)
-#
-#     # CA = 1.
-#     # CS = .45
-#     # L1 =int(L/4)  # Total Lanes
-#     # P =2.5 # Time per person per lane
-#     # N1=int(N/4)
-#     # print(calc_waiting_time(CA,CS,N,W,L,P)-calc_waiting_time(CA,CS,N1,W,L,P))
-#     N = find_number_of_student(CA,CS, W, L, P, max_wait_time=5,shared_queue=True) # first strategy
-#     to_plot2.append(N)
-#     # L = find_number_of_workers(CA,CS, N, W, P, max_wait_time=20,factor=1) # first strategy
-#     # to_plot4.append(L)
+to_plot1=[]
+to_plot2=[]
+to_plot3=[]
+to_plot4=[]
+max_st=300
+N=2000
+min_T=2.8
+L_range=np.linspace(2,8,100)
+W=8
+W_range= [28.5/14., 4.0, 37.5/14.]
+for W in W_range:
+    CA=1.
+    CS=.3
+    P=3.2
+    L = 2  # Single queue
+    N1 = find_number_of_student(CA, CS, W, L, P, max_wait_time=5, shared_queue=False)  # first strategy
+    L = 3  # Single queue
+    N2 = find_number_of_student(CA, CS, W, L, P, max_wait_time=5, shared_queue=False)  # first strategy
+    to_plot1.append(N1*4+N2*2)
+
+    # CA = 1.
+    # CS = .45
+    # L1 =int(L/4)  # Total Lanes
+    # P =2.5 # Time per person per lane
+    # N1=int(N/4)
+    # print(calc_waiting_time(CA,CS,N,W,L,P)-calc_waiting_time(CA,CS,N1,W,L,P))
+    # N = find_number_of_student(CA,CS, W, L, P, max_wait_time=5,shared_queue=True) # first strategy
+    # to_plot2.append(N)
+    # L = find_number_of_workers(CA,CS, N, W, P, max_wait_time=20,factor=1) # first strategy
+    # to_plot4.append(L)
 #
 #
 
 
 
 # print(to_plot)
-# plt.plot(list(L_range), to_plot1,label="Separate Queues, Half Service Time",color="red")
+plt.bar(["11:00 AM flight\n Tests by 9:30AM","3:00 PM flight\n Tests in 9:30AM-1:30PM","6:00 PM flight\n Tests in  1:30PM-4:30PM"], to_plot1,label="Separate Queues, Half Service Time")
+
 # plt.plot(list(L_range), to_plot2,label="Separate Queues, Original Service time.",color="blue")
 # # plt.plot(list(L_range), to_plot3,label="Shared Queue",color="red")
 # # plt.plot(list(L_range), to_plot4,label="Separate Queues, Usual Service Time",color="blue")
@@ -129,7 +131,7 @@ W= 3 # 	Total working hours
 #
 # # plt.plot(list(range(100,max_st)), to_plot3,label="Slow_track ")
 # plt.xlabel("Total Number of Working hours")
-# plt.ylabel("Total Number of Student Served  ")
+plt.ylabel("Number of Tests")
 # plt.text(2.5,1800,'~1750 students')
 # plt.text(2.5,800,'~800 students')
 # plt.hlines(y=1740,xmin=2.5, xmax=4.0, color='black',linestyles="--",alpha=0.2)
@@ -138,6 +140,6 @@ W= 3 # 	Total working hours
 # plt.plot(4.,780,'bo')
 # plt.plot(4,1740,'ro')
 # plt.legend()
-# plt.show()
+plt.show()
 #
 
